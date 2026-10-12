@@ -1,2 +1,51 @@
-# soc-homelab-wazuh-suricata
-Hands-on SOC homelab using Wazuh SIEM, Suricata IDS, Ubuntu Server, and Kali Linux to practice security monitoring and threat detection.
+# SOC Homelab: Wazuh & Suricata
+
+## Overview
+A hands-on Security Operations Center (SOC) homelab built to practice security monitoring, log analysis, and threat detection in a virtualized environment.
+
+## Lab Environment
+- **SIEM:** Wazuh Manager 4.5.4
+- **IDS:** Suricata
+- **Target:** Ubuntu Server 20.04.5 LTS
+- **Attacker / Testing VM:** Kali Linux
+- **Virtualization:** Oracle VirtualBox
+- **Remote Access:** SSH via MobaXterm
+
+## Lab Architecture
+The environment consists of three virtual machines connected through an isolated internal network.
+
+- Wazuh Manager: `192.168.77.10`
+- Target Server: `192.168.77.20`
+- Kali Linux: `192.168.77.30`
+
+## Current Progress
+- [x] Deployed Wazuh Manager
+- [x] Installed Wazuh Agent on the target server
+- [x] Configured internal lab network connectivity
+- [x] Troubleshot disk-space exhaustion affecting the Wazuh Agent
+- [ ] Verify agent connectivity and event ingestion
+- [ ] Generate test security events
+- [ ] Analyze alerts in the Wazuh dashboard
+- [ ] Document detection and investigation findings
+
+## Learning Objectives
+- Understand SIEM and IDS workflows
+- Collect and analyze security logs
+- Investigate alerts and suspicious activity
+- Practice incident investigation and documentation
+
+## Disclaimer
+This project is for educational purposes in an isolated lab environment. All security testing is intended to be performed on systems I own or am authorized to test.
+
+
+soc-homelab-wazuh-suricata/
+├── README.md
+├── docs/
+│   ├── architecture.md
+│   ├── installation.md
+│   └── troubleshooting.md
+├── screenshots/
+│   ├── wazuh-dashboard.png
+│   └── agent-status.png
+└── detections/
+    └── README.md
