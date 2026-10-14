@@ -38,14 +38,26 @@ The environment consists of three virtual machines connected through an isolated
 This project is for educational purposes in an isolated lab environment. All security testing is intended to be performed on systems I own or am authorized to test.
 
 
-soc-homelab-wazuh-suricata/
-├── README.md
-├── docs/
-│   ├── architecture.md
-│   ├── installation.md
-│   └── troubleshooting.md
-├── screenshots/
-│   ├── wazuh-dashboard.png
-│   └── agent-status.png
-└── detections/
-    └── README.md
+## Detection Validation Evidence
+
+The following screenshots demonstrate successful event ingestion and detection in the SOC homelab using Wazuh and Suricata.
+
+### 1. Custom Wazuh Rule — Rule ID 100300
+Validates that a custom Wazuh rule detects a test connectivity event from the monitored endpoint.
+
+![Wazuh custom rule 100300](screenshots/01-wazuh-custom-rule-100300.png)
+
+### 2. Suricata Alert Ingestion — Rule ID 86601
+Demonstrates a Suricata security event being ingested and detected by Wazuh.
+
+![Suricata alert 86601](screenshots/02-suricata-alert-86601.png)
+
+### 3. File Integrity Monitoring — File Added (Rule ID 554)
+Demonstrates Wazuh detecting a newly created file on the monitored endpoint.
+
+![FIM file added rule 554](screenshots/03-fim-file-added-554.png)
+
+### 4. File Integrity Monitoring — File Modified (Rule ID 550)
+Demonstrates Wazuh detecting an integrity change after a monitored file is modified.
+
+![FIM file modified rule 550](screenshots/04-fim-file-modified-550.png)
