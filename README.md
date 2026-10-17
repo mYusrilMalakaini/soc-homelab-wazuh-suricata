@@ -1,10 +1,10 @@
 # SOC Analyst Homelab — Wazuh & Suricata
 
-**Proyek laboratorium keamanan siber untuk mempelajari pemantauan keamanan, analisis log, deteksi ancaman, dan investigasi insiden menggunakan Wazuh dan Suricata.**
+Proyek laboratorium keamanan siber untuk mempelajari pemantauan keamanan, analisis log, deteksi ancaman, dan investigasi insiden menggunakan Wazuh dan Suricata.
 
 ## 1. Tentang Proyek
 
-Proyek ini merupakan simulasi lingkungan Security Operations Center (SOC) menggunakan mesin virtual di Oracle VirtualBox.
+Proyek ini merupakan simulasi lingkungan *Security Operations Center* (SOC) menggunakan mesin virtual di Oracle VirtualBox.
 
 Wazuh digunakan untuk mengumpulkan dan menganalisis event keamanan dari endpoint, sedangkan Suricata digunakan untuk memantau lalu lintas jaringan dan menghasilkan event deteksi IDS.
 
@@ -14,13 +14,14 @@ Tujuan utama proyek ini adalah memahami alur kerja SIEM, memvalidasi aturan dete
 
 | Komponen | Teknologi / Versi | Fungsi |
 |---|---|---|
-| SIEM | Wazuh Manager 4.5.4 | Pengumpulan dan analisis event keamanan |
-| Agent | Wazuh Agent 4.5.4 | Mengirim event dari endpoint ke manager |
+| SIEM | Wazuh Manager 4.14.9 | Pengumpulan dan analisis event keamanan |
+| Agent | Wazuh Agent 4.14.9 | Mengirim event dari endpoint ke manager |
 | IDS | Suricata | Pemantauan jaringan dan deteksi aktivitas mencurigakan |
 | Server target | Ubuntu Server 20.04.5 LTS | Endpoint yang dipantau |
 | Mesin pengujian | Kali Linux | Pengujian keamanan terkontrol |
 | Virtualisasi | Oracle VirtualBox | Menjalankan mesin virtual |
 | Akses jarak jauh | SSH melalui MobaXterm | Administrasi server |
+| Version control | Git dan GitHub | Pengelolaan kode dan dokumentasi |
 
 ## 3. Arsitektur Jaringan
 
@@ -36,13 +37,13 @@ Laboratorium menggunakan tiga mesin virtual yang terhubung melalui jaringan inte
 
 1. Server target menghasilkan log sistem dan event keamanan.
 2. Suricata memantau lalu lintas jaringan dan menghasilkan event IDS.
-3. Wazuh Agent meneruskan event yang dipantau ke Wazuh Manager.
+3. Wazuh Agent meneruskan log yang dikonfigurasi untuk dipantau ke Wazuh Manager.
 4. Wazuh memproses event menggunakan decoder dan aturan deteksi.
 5. Alert ditinjau melalui dashboard Wazuh untuk validasi dan investigasi.
 
 ## 4. Bukti Pengujian dan Validasi Deteksi
 
-Bagian ini berisi dokumentasi pengujian yang telah dilakukan dan hasil deteksi yang teramati di dashboard Wazuh.
+Bagian ini berisi dokumentasi pengujian yang telah dilakukan dan hasil deteksi yang teramati pada dashboard Wazuh.
 
 ### 4.1 Custom Wazuh Rule — ID 100300
 
@@ -56,7 +57,7 @@ Sebuah pesan pengujian ditulis ke log sistem pada server target. Wazuh berhasil 
 
 **Tujuan:** Memvalidasi bahwa event dari Suricata dapat diterima dan diproses oleh Wazuh.
 
-Event Suricata teramati pada dashboard Wazuh dengan rule ID `86601`. Hal ini menunjukkan bahwa event IDS berhasil masuk ke alur pemantauan Wazuh.
+Event Suricata teramati pada dashboard Wazuh dengan rule ID `86601`. Bukti ini menunjukkan bahwa event IDS tersebut berhasil masuk ke alur pemantauan Wazuh pada pengujian yang didokumentasikan.
 
 ![Bukti alert Suricata rule 86601](screenshots/02-suricata-alert-86601.png)
 
@@ -76,6 +77,40 @@ File pengujian yang sama kemudian diubah. Wazuh menghasilkan alert perubahan int
 
 ![Bukti FIM perubahan file rule 550](screenshots/04-fim-file-modified-550.png)
 
+### 4.5 SSH Authentication Failure Detection
+
+**Tujuan:** Memvalidasi pengumpulan log autentikasi SSH dan deteksi kegagalan login menggunakan Wazuh.
+
+Pengujian dilakukan dari Kali Linux terhadap server target Ubuntu dengan sengaja melakukan percobaan autentikasi SSH yang gagal. Event autentikasi tercatat pada server target dan diproses oleh Wazuh.
+
+**Ringkasan pengujian:**
+
+- **Mesin sumber:** Kali Linux (`192.168.77.30`)
+- **Server target:** Ubuntu Server (`192.168.77.20`)
+- **Wazuh Agent:** `jh-server`
+- **Rule ID 2502 — Level 10:** `PAM 2 more authentication failures`
+- **Rule ID 5710:** Percobaan login menggunakan pengguna yang tidak ditemukan
+- **Rule ID 5503:** Kegagalan login PAM
+- **MITRE ATT&CK:** `T1110` — Brute Force, sebagaimana ditampilkan pada alert terkait
+
+Bukti ini menunjukkan bahwa Wazuh menerima event kegagalan autentikasi SSH dan menghasilkan alert terkait. Pengujian tersebut merupakan simulasi kegagalan login terkontrol, bukan bukti bahwa serangan nyata telah terjadi.
+
+**Bukti alert Wazuh — Rule ID 2502**
+
+![Wazuh SSH authentication failure alert](screenshots/05-wazuh-ssh-brute-force.png)
+
+**Event autentikasi terkait**
+
+![Wazuh SSH authentication failure events](screenshots/06-wazuh-ssh-auth-failure.png)
+
+**Simulasi SSH dari Kali Linux**
+
+![Kali Linux SSH failed login test](screenshots/07-kali-ssh-failed-login.png)
+
+**Ringkasan autentikasi pada dashboard Wazuh**
+
+![Wazuh authentication overview](screenshots/08-wazuh-authentication-overview.png)
+
 ## 5. Status Pengembangan
 
 ### Selesai
@@ -83,11 +118,14 @@ File pengujian yang sama kemudian diubah. Wazuh menghasilkan alert perubahan int
 - [x] Menjalankan Wazuh Manager dan dashboard.
 - [x] Memasang Wazuh Agent pada server target.
 - [x] Mengonfigurasi konektivitas jaringan internal.
+- [x] Mengatasi masalah kehabisan ruang disk yang memengaruhi Wazuh Agent.
 - [x] Memvalidasi penerimaan event dari endpoint.
 - [x] Menguji custom Wazuh rule `100300`.
 - [x] Mengamati event Suricata pada Wazuh melalui rule `86601`.
 - [x] Memvalidasi deteksi file baru melalui rule `554`.
 - [x] Memvalidasi deteksi perubahan file melalui rule `550`.
+- [x] Menguji kegagalan autentikasi SSH dari Kali Linux ke server target.
+- [x] Memvalidasi deteksi event autentikasi SSH melalui Wazuh.
 - [x] Mendokumentasikan bukti deteksi awal.
 
 ### Tahap Berikutnya
@@ -106,7 +144,7 @@ Melalui proyek ini, keterampilan yang ingin dikembangkan meliputi:
 - Memahami konsep SIEM dan IDS.
 - Mengumpulkan serta menganalisis log keamanan endpoint dan jaringan.
 - Memahami proses deteksi melalui aturan Wazuh.
-- Melakukan validasi alert menggunakan event pengujian terkontrol.
+- Memvalidasi alert menggunakan event pengujian terkontrol.
 - Memahami File Integrity Monitoring (FIM) dan audit event.
 - Melakukan investigasi awal terhadap aktivitas mencurigakan.
 - Mendokumentasikan temuan teknis sebagai bagian dari proses penanganan insiden.
