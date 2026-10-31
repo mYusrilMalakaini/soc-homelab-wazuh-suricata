@@ -1,3 +1,42 @@
-﻿desktop.ini
+﻿# Windows
+desktop.ini
 Thumbs.db
+
+# Editors
 .vscode/
+.idea/
+
+# Environment variables and secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+id_rsa
+id_ed25519
+
+# Logs
+*.log
+*.jsonl
+
+# Temporary and backup files
+*.tmp
+*.bak
+*.old
+*.swp
+*~
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Virtual machines and disk images
+*.vdi
+*.vmdk
+*.vbox
+*.ova
+*.ovf
