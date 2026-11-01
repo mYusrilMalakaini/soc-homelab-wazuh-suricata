@@ -1,124 +1,83 @@
 # SOC Analyst Homelab — Wazuh & Suricata
 
-A cybersecurity home lab project for learning SIEM operations, endpoint monitoring, network intrusion detection, security event analysis, and incident investigation using Wazuh and Suricata.
+Proyek *cybersecurity home lab* untuk mempelajari operasi SIEM, pemantauan endpoint, deteksi intrusi jaringan, analisis event keamanan, dan investigasi insiden menggunakan Wazuh dan Suricata.
 
-## 1. Project Overview
+## 1. Gambaran Umum Proyek
 
-This project simulates a small Security Operations Center (SOC) environment using virtual machines in Oracle VirtualBox.
+Proyek ini menyimulasikan lingkungan Security Operations Center (SOC) sederhana menggunakan beberapa virtual machine di Oracle VirtualBox.
 
-- **Wazuh** provides endpoint security monitoring, log collection, event analysis, and alert management.
-- **Suricata** monitors network traffic and generates Network Intrusion Detection System (NIDS) alerts.
-- **Kali Linux** is used to perform controlled security tests against the lab target.
+- **Wazuh** digunakan untuk pemantauan keamanan endpoint, pengumpulan log, analisis event, dan pengelolaan alert.
+- **Suricata** digunakan untuk memantau lalu lintas jaringan dan menghasilkan alert Network Intrusion Detection System (NIDS).
+- **Kali Linux** digunakan untuk melakukan pengujian keamanan terkontrol terhadap server target.
 
-The main objective is to understand how security events are generated, collected, detected, and investigated in a controlled environment.
+Tujuan utama proyek ini adalah memahami bagaimana event keamanan dihasilkan, dikumpulkan, dideteksi, dan dianalisis dalam lingkungan pengujian yang terkontrol.
 
-## 2. Lab Architecture
+## 2. Arsitektur Lab
 
-| Component | Technology | Role |
+| Komponen | Teknologi | Peran |
 |---|---|---|
-| SIEM | Wazuh Manager 4.14.9 | Event analysis and alert management |
-| Endpoint Agent | Wazuh Agent 4.14.9 | Endpoint log collection |
-| IDS | Suricata 8.0.4 | Network traffic monitoring |
-| Target | Ubuntu Server 20.04.5 LTS | Monitored endpoint |
-| Testing Machine | Kali Linux | Controlled security testing |
-| Virtualization | Oracle VirtualBox | Virtual lab environment |
+| SIEM | Wazuh Manager 4.14.9 | Analisis event dan pengelolaan alert |
+| Endpoint Agent | Wazuh Agent 4.14.9 | Pengumpulan log endpoint |
+| IDS | Suricata 8.0.4 | Pemantauan lalu lintas jaringan |
+| Target | Ubuntu Server 20.04.5 LTS | Endpoint yang dipantau |
+| Mesin Pengujian | Kali Linux | Pengujian keamanan terkontrol |
+| Virtualisasi | Oracle VirtualBox | Lingkungan virtual lab |
 
-### Network Topology
+### Topologi Jaringan
 
-| Virtual Machine | Internal IP | Role |
+| Virtual Machine | IP Internal | Peran |
 |---|---|---|
 | Wazuh Server | `192.168.77.10` | SIEM |
-| Target Server | `192.168.77.20` | Wazuh Agent and Suricata |
-| Kali Linux | `192.168.77.30` | Security testing |
+| Target Server | `192.168.77.20` | Wazuh Agent dan Suricata |
+| Kali Linux | `192.168.77.30` | Pengujian keamanan |
 
-- **Network:** `192.168.77.0/24`
-- **VirtualBox network:** Internal Network (`intnet`)
+- **Jaringan:** `192.168.77.0/24`
+- **VirtualBox Network:** Internal Network (`intnet`)
 
-See [Lab Architecture](docs/architecture/lab-architecture.md) for details.
+Lihat [Arsitektur Lab](docs/architecture/lab-architecture.md) untuk penjelasan lebih lanjut.
 
-## 3. Validated Detection Scenarios
+## 3. Skenario Deteksi yang Telah Divalidasi
 
-| Scenario | Detection | Result |
+| Skenario | Deteksi | Hasil |
 |---|---|---|
-| Custom Wazuh Rule | Rule ID `100300` | Validated |
-| Suricata Event Integration | Wazuh Rule ID `86601` | Validated |
-| File Integrity Monitoring | Rule IDs `554`, `550` | Validated |
-| SSH Authentication Failures | Rule IDs `2502`, `5710`, `5503` | Validated |
-| TCP SYN Scan Detection | Suricata SID `1000001` | Validated |
+| Custom Wazuh Rule | Rule ID `100300` | Tervalidasi |
+| Integrasi Event Suricata | Wazuh Rule ID `86601` | Tervalidasi |
+| File Integrity Monitoring | Rule ID `554`, `550` | Tervalidasi |
+| Kegagalan Autentikasi SSH | Rule ID `2502`, `5710`, `5503` | Tervalidasi |
+| Deteksi TCP SYN Scan | Suricata SID `1000001` | Tervalidasi |
+| Deteksi IOC Berdasarkan Hash | Wazuh Rule ID `100320`, Level 10 | Tervalidasi |
 
-These results represent controlled tests performed in the lab, not confirmed real-world attacks.
+Seluruh hasil tersebut berasal dari pengujian terkontrol di lingkungan lab dan bukan merupakan bukti terjadinya serangan nyata.
 
-### Detection Documentation
+### Dokumentasi Deteksi
 
-- [SSH Authentication Failure Detection](docs/detections/ssh-authentication.md)
+- [Deteksi Kegagalan Autentikasi SSH](docs/detections/ssh-authentication.md)
 - [File Integrity Monitoring](docs/detections/file-integrity-monitoring.md)
 - [Network Intrusion Detection](docs/detections/network-intrusion.md)
+- [Deteksi IOC / Hash File Mencurigakan](docs/detections/ioc-hash-detection.md)
 
-## 4. Evidence
+## 4. Bukti Pengujian
 
-Screenshots from the lab are organized by category:
+Screenshot hasil pengujian dikelompokkan berdasarkan kategori dan skenario:
 
-- [Wazuh Evidence](screenshots/wazuh/)
-- [Suricata Evidence](screenshots/suricata/)
-- [Testing Evidence](screenshots/testing/)
+- [Bukti Wazuh](screenshots/wazuh/)
+- [Bukti Suricata](screenshots/suricata/)
+- [Bukti Pengujian](screenshots/testing/)
+- [Bukti Deteksi IOC Hash](screenshots/case-04-ioc-hash-detection/)
 
-## 5. Project Status
+Dokumentasi pada setiap skenario juga memuat gambar bukti pengujian yang relevan.
 
-### Validated
+## 5. Status Proyek
 
-- [x] Wazuh Manager and Dashboard deployment
-- [x] Wazuh Agent connectivity
-- [x] Custom Wazuh rule testing
-- [x] Suricata event collection by Wazuh
-- [x] File creation and modification detection
-- [x] SSH authentication failure monitoring
-- [x] Controlled TCP SYN scan detection
+### Telah Divalidasi
 
-### Planned / Further Validation
+- [x] Deployment Wazuh Manager dan Dashboard
+- [x] Konektivitas Wazuh Agent
+- [x] Pengujian custom Wazuh rule
+- [x] Pengumpulan event Suricata oleh Wazuh
+- [x] Deteksi pembuatan dan modifikasi file
+- [x] Pemantauan kegagalan autentikasi SSH
+- [x] Deteksi TCP SYN scan terkontrol
+- [x] Deteksi IOC berdasarkan pencocokan hash SHA-256
 
-- [ ] Validate ClamAV-based EICAR detection with a functioning signature database
-- [ ] Validate exact FIM file-path attribution
-- [ ] Validate Who-data attribution
-- [ ] Investigate the earlier audit event-dispatch warning
-- [ ] Validate Wazuh Active Response in the isolated lab
-- [ ] Expand incident investigation documentation
-
-## 6. Repository Structure
-
-```text
-soc-homelab-wazuh-suricata/
-├── README.md
-├── docs/
-│   ├── architecture/
-│   │   └── lab-architecture.md
-│   ├── detections/
-│   │   ├── ssh-authentication.md
-│   │   ├── file-integrity-monitoring.md
-│   │   └── network-intrusion.md
-│   └── progress-log.md
-└── screenshots/
-    ├── wazuh/
-    ├── suricata/
-    └── testing/
-```
-
-## 7. Learning Objectives
-
-This project is intended to develop practical skills in:
-
-- SIEM and IDS fundamentals
-- Endpoint and network security monitoring
-- Security event and alert analysis
-- Detection rule validation
-- File Integrity Monitoring
-- Initial incident investigation and documentation
-
-## 8. Security Notes
-
-This repository documents a controlled cybersecurity lab. All testing is limited to systems owned by the lab operator or systems for which explicit authorization has been granted.
-
-Never publish passwords, API keys, access tokens, private keys, or other sensitive information. Raw logs should be reviewed and sanitized before publication.
-
-## 9. Progress Log
-
-See [Project Progress Log](docs/progress-log.md) for development notes and validation history.
+### Dir
