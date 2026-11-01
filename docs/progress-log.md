@@ -92,7 +92,7 @@ Alert berhasil diterima oleh Wazuh Manager melalui integrasi log Suricata.
 
 **Bukti pengujian:**
 
-![Wazuh Suricata SYN scan alert](../screenshots/wazuh/10-wazuh-suricata-syn-scan-alert.png)
+![Wazuh Suricata SYN scan alert](../screenshots/suricata/10-wazuh-suricata-syn-scan-alert.png)
 
 Pengujian ini merupakan simulasi pemindaian port terkontrol. Alert menunjukkan aktivitas terdeteksi, bukan berarti trafik berhasil diblokir.
 
