@@ -1,32 +1,32 @@
 # SOC Analyst Home Lab — Progress Log
 
-## 1. Project Environment
+## 1. Lingkungan Proyek
 
 Proyek ini merupakan implementasi home lab Security Operations Center (SOC) menggunakan Wazuh dan Suricata untuk memantau aktivitas endpoint serta jaringan.
 
-Lingkungan laboratorium dibangun menggunakan VirtualBox dengan jaringan internal `192.168.77.0/24`.
+Lingkungan laboratorium dibangun menggunakan Oracle VirtualBox dengan jaringan internal `192.168.77.0/24`.
 
-## 2. Lab Components and Connectivity
+## 2. Komponen Lab dan Konektivitas
 
 | Komponen | Hostname | IP Address | Keterangan |
 |---|---|---|---|
-| Wazuh Manager | `wazuh-server` | `192.168.77.10` | Centralized monitoring dan alert management |
-| Ubuntu Server | `jh-server` | `192.168.77.20` | Target endpoint dan Suricata sensor |
+| Wazuh Manager | `wazuh-server` | `192.168.77.10` | Pemantauan terpusat dan pengelolaan alert |
+| Ubuntu Server | `jh-server` | `192.168.77.20` | Endpoint target dan sensor Suricata |
 | Kali Linux | `kali` | `192.168.77.30` | Mesin pengujian |
 
 **Detail lingkungan:**
-- Virtualization: Oracle VirtualBox
-- Network: Internal Network (`intnet`)
+- Virtualisasi: Oracle VirtualBox
+- Jaringan: Internal Network (`intnet`)
 - Subnet: `192.168.77.0/24`
 - Wazuh Agent: `4.14.9`
 - Suricata: `8.0.4`
-- Target OS: Ubuntu Server `20.04.5 LTS`
-- Suricata interface: `enp0s3`
-- Suricata EVE log: `/var/log/suricata/eve.json`
+- Sistem operasi target: Ubuntu Server `20.04.5 LTS`
+- Interface Suricata: `enp0s3`
+- Log EVE Suricata: `/var/log/suricata/eve.json`
 
-## 3. Validated Detection Results
+## 3. Hasil Deteksi yang Telah Divalidasi
 
-### 3.1 SSH Authentication Failure Detection
+### 3.1 Deteksi Kegagalan Autentikasi SSH
 
 Pengujian dilakukan dengan menjalankan percobaan autentikasi SSH yang sengaja gagal dari Kali Linux menuju Ubuntu Server.
 
@@ -129,7 +129,47 @@ Alert berhasil diterima oleh Wazuh Manager dengan informasi agent `jh-server`, a
 
 **Catatan:** hash yang digunakan merupakan IOC simulasi yang dibuat sendiri untuk keperluan pengujian. Hash tersebut bukan indikator malware yang telah diverifikasi dan file pengujian bukan malware.
 
-## 4. Malware Detection — In Progress
+### 3.5 Suspicious Network Activity — Koneksi TCP ke Port 4444
+
+Pengujian dilakukan dari Kali Linux (`192.168.77.30`) menuju Ubuntu Server (`192.168.77.20`) pada port TCP `4444`. Suricata menggunakan rule lokal dengan Signature ID `1000002` untuk mengamati paket TCP SYN menuju port tersebut.
+
+Event alert teramati pada log EVE Suricata dengan rincian:
+
+| Atribut | Hasil |
+|---|---|
+| Suricata Signature ID | `1000002` |
+| Signature | `LOCAL DETECT Repeated TCP Connection Attempts to Port 4444` |
+| Source IP | `192.168.77.30` |
+| Destination IP | `192.168.77.20` |
+| Destination port | `4444` |
+| Protocol | `TCP` |
+| Direction | `to_server` |
+| Action | `allowed` |
+| Severity | `2` |
+
+Event yang sama terlihat pada dashboard Wazuh melalui rule berikut:
+
+| Atribut | Hasil |
+|---|---|
+| Wazuh Rule ID | `86601` |
+| Wazuh Level | `3` |
+| Agent | `jh-server` |
+| Agent ID | `001` |
+| Suricata Signature ID | `1000002` |
+
+**Bukti pengujian:**
+
+![Wazuh suspicious network events](../screenshots/case-05-suspicious-network-activity/16-wazuh-suspicious-network-events.png)
+
+![Wazuh suspicious network alert details](../screenshots/case-05-suspicious-network-activity/17-wazuh-suspicious-network-details.png)
+
+![Suricata suspicious network alert](../screenshots/case-05-suspicious-network-activity/18-suricata-suspicious-network-alert.png)
+
+**Batasan validasi:** rule dikonfigurasi dengan threshold `count 5, seconds 10`, tetapi event yang diamati muncul pada waktu yang terpisah sekitar 69 detik. Karena itu, pemenuhan threshold lima koneksi dalam sepuluh detik belum dapat dinyatakan tervalidasi. Nilai `action: allowed` juga menunjukkan bahwa trafik terdeteksi tetapi tidak diblokir oleh rule alert tersebut.
+
+Dokumentasi lengkap tersedia pada [Suspicious Network Activity Detection](detections/suspicious-network-activity.md).
+
+## 4. Deteksi Malware — Dalam Proses
 
 Pengujian malware detection menggunakan ClamAV pada Ubuntu Server masih dalam proses.
 
@@ -148,42 +188,39 @@ Database signature ClamAV belum berhasil diperbarui karena pembatasan akses dan 
 
 **Status validasi:**
 
-Integrasi event log manual dengan Wazuh telah berhasil diuji. Namun, deteksi hasil pemindaian EICAR secara langsung oleh ClamAV belum tervalidasi. Oleh karena itu, skenario malware detection masih berstatus *In Progress*.
+Integrasi event log manual dengan Wazuh telah berhasil diuji. Namun, deteksi hasil pemindaian EICAR secara langsung oleh ClamAV belum tervalidasi. Oleh karena itu, skenario malware detection masih berstatus *Dalam Proses*.
 
-## 5. Outstanding Items
-
-Beberapa pekerjaan yang masih direncanakan atau membutuhkan validasi lanjutan:
+## 5. Pekerjaan yang Masih Berjalan
 
 1. Menyelesaikan pembaruan database ClamAV dan memvalidasi pemindaian EICAR secara langsung.
-2. Menambahkan atribusi path file yang lebih spesifik pada hasil pengujian FIM.
-3. Mengeksplorasi konfigurasi FIM Who-data.
-4. Meninjau peringatan terkait audit event dispatch.
-5. Mengimplementasikan dan menguji Wazuh Active Response.
-6. Melengkapi dokumentasi investigasi insiden berdasarkan alert yang telah dihasilkan.
-7. Mengembangkan skenario Suspicious Network Activity yang berbeda dari pengujian TCP SYN scan sebelumnya.
+2. Memvalidasi threshold rule Suspicious Network Activity melalui pengujian terukur untuk memastikan lima koneksi terdeteksi dalam sepuluh detik.
+3. Menambahkan atribusi path file yang lebih spesifik pada hasil pengujian FIM.
+4. Mengeksplorasi konfigurasi FIM Who-data.
+5. Meninjau peringatan terkait audit event dispatch.
+6. Mengimplementasikan dan menguji Wazuh Active Response.
+7. Melengkapi dokumentasi investigasi insiden berdasarkan alert yang telah dihasilkan.
 
-## 6. Security Notes
+## 6. Catatan Keamanan
 
 - Seluruh pengujian dilakukan dalam lingkungan VirtualBox terisolasi menggunakan jaringan internal.
-- Percobaan login SSH gagal dan pemindaian Nmap merupakan aktivitas simulasi terkontrol.
+- Percobaan login SSH gagal, pemindaian Nmap, dan koneksi TCP ke port 4444 merupakan aktivitas simulasi terkontrol.
 - Pengujian IOC menggunakan hash buatan sendiri, bukan hash malware yang telah diverifikasi.
 - File EICAR merupakan file uji antivirus standar dan bukan malware aktif.
 - Alert yang dihasilkan menunjukkan aktivitas terdeteksi oleh sistem monitoring. Alert tidak otomatis berarti aktivitas berhasil diblokir.
-- Hasil pengujian hanya dinyatakan tervalidasi apabila event atau alert terkait telah diamati pada sistem yang bersangkutan.
+- Hasil pengujian hanya dinyatakan tervalidasi sesuai ruang lingkup bukti yang benar-benar diamati.
 
-## 7. Summary
+## 7. Ringkasan
 
-Implementasi SOC home lab telah berhasil memvalidasi beberapa skenario deteksi menggunakan Wazuh dan Suricata.
-
-Skenario yang telah tervalidasi:
+Implementasi SOC home lab telah berhasil memvalidasi beberapa skenario deteksi menggunakan Wazuh dan Suricata, yaitu:
 
 - SSH Authentication Failure Detection.
 - File Integrity Monitoring.
 - Network Intrusion Detection melalui TCP SYN Scan.
 - IOC / Suspicious File Hash Detection.
+- Deteksi event koneksi TCP ke port 4444 melalui Suricata dan Wazuh.
 
-Integrasi Suricata dan Wazuh telah berhasil menghasilkan alert dari aktivitas jaringan yang disimulasikan. Wazuh juga berhasil menerima event autentikasi, perubahan integritas file, dan pencocokan hash IOC.
+Integrasi Suricata dan Wazuh telah menghasilkan alert dari aktivitas jaringan yang disimulasikan. Wazuh juga berhasil menerima event autentikasi, perubahan integritas file, dan pencocokan hash IOC.
 
-Skenario Malware Detection menggunakan ClamAV masih dalam proses karena pembaruan database signature belum berhasil diselesaikan.
+Validasi threshold rule Suspicious Network Activity masih perlu dilanjutkan. Skenario Malware Detection menggunakan ClamAV juga masih dalam proses karena pembaruan database signature belum berhasil diselesaikan.
 
-Pengembangan selanjutnya difokuskan pada penyelesaian pengujian ClamAV, Active Response, dan skenario deteksi aktivitas jaringan tambahan.
+Pengembangan selanjutnya difokuskan pada validasi lanjutan tersebut, pengujian ClamAV secara langsung, dan implementasi Active Response.
