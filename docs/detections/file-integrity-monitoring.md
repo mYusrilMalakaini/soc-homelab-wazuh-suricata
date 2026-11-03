@@ -1,91 +1,48 @@
-\# File Integrity Monitoring (FIM)
+# Pemantauan Integritas File (FIM)
 
+## 1. Tujuan
 
+Memvalidasi kemampuan Wazuh File Integrity Monitoring (FIM) dalam mendeteksi pembuatan dan perubahan file pengujian pada direktori endpoint yang dipantau.
 
-\## 1. Objective
+## 2. Konfigurasi Lab
 
-
-
-Validate Wazuh File Integrity Monitoring (FIM) by creating and modifying test files in a monitored endpoint directory.
-
-
-
-\## 2. Lab Configuration
-
-
-
-| Component | Details |
-
+| Komponen | Detail |
 |---|---|
-
 | Endpoint | Ubuntu Server (`192.168.77.20`) |
-
 | Wazuh Agent | `jh-server` |
-
 | SIEM | Wazuh 4.14.9 |
+| Direktori pengujian | `/home/jadihacker` |
 
-| Test directory | `/home/jadihacker` |
+## 3. Prosedur Pengujian
 
+Dua operasi file dilakukan secara terkontrol pada endpoint Ubuntu:
 
+1. Membuat file pengujian baru di dalam direktori yang dipantau.
+2. Memodifikasi file pengujian yang sama untuk mengubah isinya.
 
-\## 3. Test Procedure
+Wazuh FIM memantau aktivitas tersebut dan menghasilkan event keamanan yang sesuai.
 
+## 4. Hasil Deteksi
 
-
-Two controlled file operations were performed on the Ubuntu endpoint:
-
-
-
-1\. A new test file was created in the monitored directory.
-
-2\. The same test file was modified to change its contents.
-
-
-
-Wazuh FIM monitored the file activity and generated corresponding security events.
-
-
-
-\## 4. Detection Results
-
-
-
-| Wazuh Rule ID | Detection |
-
+| Wazuh Rule ID | Jenis Deteksi |
 |---|---|
+| `554` | File ditambahkan ke sistem |
+| `550` | Checksum integritas file mengalami perubahan |
 
-| `554` | File added to the system |
+Hasil tersebut menunjukkan bahwa Wazuh dapat mendeteksi aktivitas penambahan file dan perubahan integritas file pada direktori yang dipantau.
 
-| `550` | File integrity checksum changed |
+## 5. Bukti Pengujian
 
+### Deteksi Pembuatan File
 
+![Deteksi penambahan file oleh FIM](../../screenshots/wazuh/03-fim-file-added-554.png)
 
-\## 5. Evidence
+### Deteksi Perubahan File
 
+![Deteksi perubahan file oleh FIM](../../screenshots/wazuh/04-fim-file-modified-550.png)
 
+## 6. Kesimpulan
 
-\### File Creation Detection
+Wazuh berhasil menghasilkan alert FIM ketika sebuah file pengujian dibuat dan kemudian dimodifikasi pada direktori endpoint yang dipantau.
 
-
-
-!\[FIM file added](../../screenshots/wazuh/03-fim-file-added-554.png)
-
-
-
-\### File Modification Detection
-
-
-
-!\[FIM file modified](../../screenshots/wazuh/04-fim-file-modified-550.png)
-
-
-
-\## 6. Conclusion
-
-
-
-Wazuh successfully generated FIM alerts when a test file was created and subsequently modified in the monitored endpoint directory.
-
-
-
-These results validate basic file creation and integrity-change monitoring. Exact file-path attribution and Who-data attribution require separate validation.
+Hasil pengujian ini memvalidasi fungsi dasar pemantauan penambahan file dan perubahan integritas file. Namun, atribusi jalur file secara spesifik (*exact file-path attribution*) dan atribusi menggunakan Who-data masih memerlukan pengujian terpisah.
