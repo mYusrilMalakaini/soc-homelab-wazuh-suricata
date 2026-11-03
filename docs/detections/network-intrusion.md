@@ -1,113 +1,59 @@
-\# Network Intrusion Detection — Suricata and Wazuh
+# Deteksi Intrusi Jaringan — Suricata dan Wazuh
 
+## 1. Tujuan
 
+Memvalidasi kemampuan Suricata dalam mendeteksi aktivitas pemindaian TCP SYN yang dilakukan secara terkontrol serta memastikan bahwa alert yang dihasilkan diteruskan dan diproses oleh Wazuh.
 
-\## 1. Objective
+## 2. Konfigurasi Lab
 
-
-
-Validate Suricata's ability to detect a controlled TCP SYN scan and verify that the resulting alert is forwarded to and processed by Wazuh.
-
-
-
-\## 2. Lab Configuration
-
-
-
-| Component | Details |
-
+| Komponen | Detail |
 |---|---|
-
-| Source | Kali Linux (`192.168.77.30`) |
-
-| Target | Ubuntu Server (`192.168.77.20`) |
-
-| Network interface | `enp0s3` |
-
+| Mesin sumber | Kali Linux (`192.168.77.30`) |
+| Server target | Ubuntu Server (`192.168.77.20`) |
+| Antarmuka jaringan | `enp0s3` |
 | IDS | Suricata 8.0.4 |
-
 | SIEM | Wazuh 4.14.9 |
 
+## 3. Prosedur Pengujian
 
-
-\## 3. Test Procedure
-
-
-
-A TCP SYN scan was performed from Kali Linux against the Ubuntu target using Nmap:
-
-
+Pemindaian TCP SYN dilakukan dari Kali Linux menuju server Ubuntu menggunakan Nmap dengan perintah berikut:
 
 ```bash
-
 nmap -sS -T3 --top-ports 100 192.168.77.20
-
 ```
 
+Sebuah custom rule Suricata dikonfigurasi untuk mendeteksi minimal 10 paket TCP SYN dari alamat IP sumber Kali Linux dalam rentang waktu 10 detik.
 
+## 4. Hasil Deteksi
 
-A custom Suricata rule was configured to detect at least 10 TCP SYN packets from the Kali source within 10 seconds.
-
-
-
-\## 4. Detection Results
-
-
-
-| Detection component | Result |
-
+| Komponen Deteksi | Hasil |
 |---|---|
-
-| Suricata custom signature ID | `1000001` |
-
-| Suricata signature | `LOCAL DETECT Kali Linux TCP SYN Scan` |
-
-| Wazuh rule ID | `86601` |
-
-| Wazuh alert level | `3` |
-
+| Suricata Custom Signature ID | `1000001` |
+| Suricata Signature | `LOCAL DETECT Kali Linux TCP SYN Scan` |
+| Wazuh Rule ID | `86601` |
+| Level Alert Wazuh | `3` |
 | Source IP | `192.168.77.30` |
-
 | Destination IP | `192.168.77.20` |
+| Log Event | `/var/log/suricata/eve.json` |
 
-| Event log | `/var/log/suricata/eve.json` |
+Suricata berhasil menghasilkan alert berdasarkan trafik pengujian. Event tersebut dikumpulkan oleh Wazuh Agent dan diproses oleh Wazuh Manager menggunakan Rule ID `86601`.
 
+Hasil ini menunjukkan bahwa integrasi pengiriman event dari Suricata ke Wazuh berjalan dengan baik.
 
+## 5. Bukti Pengujian
 
-Suricata generated an alert for the test traffic. The event was collected by the Wazuh Agent and processed by Wazuh Manager using rule `86601`.
+### Alert Suricata pada Wazuh
 
+![Alert Suricata pada Wazuh](../../screenshots/suricata/09-wazuh-suricata-alert.png)
 
+### Deteksi Pemindaian TCP SYN
 
-\## 5. Evidence
+![Alert deteksi TCP SYN Scan](../../screenshots/suricata/10-wazuh-suricata-syn-scan-alert.png)
 
+## 6. Kesimpulan
 
+Aktivitas pemindaian TCP SYN yang dilakukan secara terkontrol berhasil dideteksi oleh custom rule Suricata. Event yang dihasilkan juga berhasil diteruskan dan diproses oleh Wazuh.
 
-\### Suricata Alert in Wazuh
+Pengujian ini memvalidasi integrasi event Suricata ke Wazuh serta fungsi rule deteksi yang dikonfigurasi di lingkungan lab. Aktivitas tersebut merupakan simulasi *network reconnaissance* yang terkontrol, bukan bukti terjadinya serangan nyata.
 
-
-
-!\[Suricata alert](../../screenshots/suricata/09-wazuh-suricata-alert.png)
-
-
-
-\### TCP SYN Scan Detection
-
-
-
-!\[TCP SYN scan alert](../../screenshots/suricata/10-wazuh-suricata-syn-scan-alert.png)
-
-
-
-\## 6. Conclusion
-
-
-
-The controlled TCP SYN scan was detected by the custom Suricata rule and the resulting event was successfully processed by Wazuh.
-
-
-
-This validates the Suricata-to-Wazuh event integration and the configured detection rule in the lab environment. The test represents controlled reconnaissance activity, not evidence of a real-world attack.
-
-
-
-Suricata operated in IDS mode; the alert action was `allowed`, meaning the traffic was detected but not blocked.
+Suricata berjalan dalam mode IDS. Status aksi alert adalah `allowed`, yang berarti trafik berhasil dideteksi tetapi tidak diblokir.
